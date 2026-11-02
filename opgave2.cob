@@ -1,0 +1,30 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASSIGNMENT2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      * Allocate space for variables in memory.
+           01 WS-KUNDE-ID PIC X(10) VALUE SPACES.
+           01 WS-FORNAVN PIC X(20) VALUE SPACES.
+           01 WS-EFTERNAVN PIC X(20) VALUE SPACES.
+           01 WS-KONTONUMMER PIC X(20) VALUE SPACES.
+           01 WS-BALANCE PIC 9(7)V99 VALUE ZEROS.
+           01 WS-VALUTAKODE PIC X(3) VALUE SPACES.
+
+       PROCEDURE DIVISION.
+      * Overwrite variables
+           MOVE "1234567890" TO WS-KUNDE-ID.
+           MOVE "Lars" TO WS-FORNAVN.
+           MOVE "Hansen" TO WS-EFTERNAVN.
+           MOVE "DK12345678912345" TO WS-KONTONUMMER.
+           MOVE 2500.75 TO WS-BALANCE.
+           MOVE "DKK" TO WS-VALUTAKODE.
+
+      * Prints variables
+           DISPLAY WS-KUNDE-ID.
+           DISPLAY WS-FORNAVN.
+           DISPLAY WS-EFTERNAVN.
+           DISPLAY WS-KONTONUMMER.
+           DISPLAY WS-BALANCE.
+           DISPLAY WS-VALUTAKODE.
+
+           STOP RUN.

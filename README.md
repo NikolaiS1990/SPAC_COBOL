@@ -15,6 +15,27 @@ It does not contain a project.
 
 # 🛠️ Installation on Linux
 
+## WSL2 installation and VSCodium
+
+Satya Nadella really wants you to use Copilot, and thus getting
+VS Code to stop making suggestions can be difficult.
+LLMs can be detrimental to learning because trying to [recall
+information yourself is crucial](https://pmc.ncbi.nlm.nih.gov/articles/PMC12723506/), and LLMs take that away from you.
+
+Using VSCodium is therefor recommended
+
+In PowerShell, run
+```PS
+winget install vscodium
+```
+
+2. Launch VSCodium and get the extension `Open Remote - WSL` by jeanp413.
+
+Now you can connect to WSL2 to VSCodium, and follow the `Linux installation` guide.
+
+
+## Linux installation:
+
 1. Check which version of GnuCOBOL is recommended: [https://gnucobol.sourceforge.io/](https://gnucobol.sourceforge.io/)
 
 ## Install with apt
