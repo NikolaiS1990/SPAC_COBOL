@@ -61,10 +61,12 @@
            END-PERFORM.
 
       * Prints variables
-           DISPLAY WS-KUNDE-ID.
-           DISPLAY WS-RENSET-NAVN.
-           DISPLAY WS-KONTONUMMER.
-           DISPLAY WS-BALANCE.
-           DISPLAY WS-VALUTAKODE.
+           DISPLAY "----------------------------------------"
+           DISPLAY "Kunde ID: " WS-KUNDE-ID.
+           DISPLAY "Navn (renset): " WS-RENSET-NAVN.
+           DISPLAY "Kontonummer: " WS-KONTONUMMER.
+           DISPLAY "Balance: " WS-BALANCE.
+           DISPLAY "Valutakode: " WS-VALUTAKODE.
+           DISPLAY "----------------------------------------"
 
            STOP RUN.
