@@ -1,9 +1,19 @@
-# Description
+# 🌟Description
 
 This repo contains assignments from taking the COBOL course at Specialisterne Academy.
 It does not contain a project.
 
-# Installation on Linux
+# 📂 File structure
+```text
+.
+├── LICENSE
+├── README.md
+├── dist
+│   └── opgave1
+└── opgave1.cob
+```
+
+# 🛠️ Installation on Linux
 
 1. Check which version of GnuCOBOL is recommended: [https://gnucobol.sourceforge.io/](https://gnucobol.sourceforge.io/)
 
@@ -70,7 +80,7 @@ Install the `COBOL` extension from `bitlang`
 
 Go to the gear icon in the bottom left corner, select `settings`, search for `coboleditor.intellisense_style`, and select `UPPERCASE`
 
-# Compilation and Execution
+# ⚙️ Compilation and Execution
 
 Compile script
 
@@ -92,3 +102,7 @@ If you want the compiled code to be placed in a specific folder, you can run
 cobc -x Hello.cob -o dist/Hello
 ./dist/Hello
 ```
+
+# 📜 License
+
+The code is licensed under the MIT License
