@@ -1,4 +1,7 @@
-Here is the English translation of the text:
+# Description
+
+This repo contains assignments from taking the COBOL course at Specialisterne Academy.
+It does not contain a project.
 
 # Installation on Linux
 
