@@ -22,7 +22,8 @@
       
       * USING "DELIMITED BY SPACE" strips out ALL the white SPACE
       * in the variable.
-           STRING WS-FORNAVN DELIMITED BY SPACE
+           STRING
+               WS-FORNAVN DELIMITED BY SPACE
                " " DELIMITED BY SIZE
                WS-EFTERNAVN DELIMITED BY SPACE
                INTO WS-FULDE-NAVN.
