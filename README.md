@@ -61,6 +61,8 @@ Refresh the terminal with
 source ~/.bashrc
 ```
 
+## Install extension for VScode and VScodium
+
 Install the `COBOL` extension from `bitlang`
 
 Go to the gear icon in the bottom left corner, select `settings`, search for `coboleditor.intellisense_style`, and select `UPPERCASE`
