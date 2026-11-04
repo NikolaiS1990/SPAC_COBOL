@@ -2,8 +2,8 @@
               03 VEJNAVN       PIC X(30).
               03 HUSNR         PIC X(5).
               03 ETAGE         PIC X(5).
-              03 SIDE          PIC X(5).
-              03 BYNAVN        PIC X(5).
+              03 SIDE          PIC X(6).
+              03 BYNAVN        PIC X(6).
               03 POSTNR        PIC 9(4).
               03 LANDE-KODE    PIC X(5).
            02 KONTAKT-INFO.
