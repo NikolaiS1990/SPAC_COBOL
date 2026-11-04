@@ -101,7 +101,14 @@ Install the `COBOL` extension from `bitlang`
 
 Go to the gear icon in the bottom left corner, select `settings`, search for `coboleditor.intellisense_style`, and select `UPPERCASE`
 
+# 🛠️ Prep your local environment
+Create the dist folder
+```bash
+mkdir dist
+```
+
 # ⚙️ Compilation and Execution
+Now you are ready to code and compile scripts.
 
 Compile script
 
