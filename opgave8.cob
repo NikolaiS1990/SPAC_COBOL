@@ -18,5 +18,3 @@
        FD OUTPUT-FILE.
        01 KUNDEKONTO.
               02 OUTPUT-TEXT PIC X(200).
-
-       WORKING-STORAGE SECTION.
