@@ -6,25 +6,11 @@
        FILE-CONTROL.
            SELECT INPUT-FILE ASSIGN TO "Kundeoplysninger.txt"
                ORGANIZATION IS LINE SEQUENTIAL.
-           SELECT OUTPUT-FILE ASSIGN TO "outputfile.txt"
-               ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
        FILE SECTION.
        FD INPUT-FILE.
        01 INPUT-RECORD.
-              05 VEJNAVN       PIC X(12).
-              05 HUSNR         PIC X(3).
-              05 ETAGE         PIC X(2).
-              05 SIDE          PIC X(7).
-              05 BYNAVN        PIC X(7).
-              05 POSTNR        PIC 9(5).
-              05 LANDE-KODE    PIC X(3).
-              05 TELEFON       PIC X(9).
-              05 EMAIL         PIC X(21).
-
-       FD OUTPUT-FILE.
-       01 OUTPUT-RECORD.
               05 VEJNAVN       PIC X(12).
               05 HUSNR         PIC X(3).
               05 ETAGE         PIC X(2).
@@ -41,20 +27,9 @@
 
        PROCEDURE DIVISION.
            OPEN INPUT INPUT-FILE
-           OPEN OUTPUT OUTPUT-FILE
-
-           PERFORM UNTIL END-OF-FILE = "Y"
-               READ INPUT-FILE INTO INPUT-RECORD
-               AT END 
-                   MOVE "Y" TO END-OF-FILE
-               NOT AT END 
-                   MOVE INPUT-RECORD TO OUTPUT-RECORD
-                   WRITE OUTPUT-RECORD
-               END-READ 
-           END-PERFORM
+           READ INPUT-FILE INTO INPUT-RECORD
 
            CLOSE INPUT-FILE
-           CLOSE OUTPUT-FILE
 
            DISPLAY "----------------------------------------"
            DISPLAY "Vejnavn: " VEJNAVN OF INPUT-RECORD.
