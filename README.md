@@ -7,10 +7,30 @@ It does not contain a project.
 ```text
 .
 ├── LICENSE
-├── README.md
-├── dist
-│   └── opgave1
-└── opgave1.cob
+├── opgave10
+│   ├── banker-strukt.cpy
+│   ├── Banker.txt
+│   ├── opgave10.cob
+│   └── Transaktioner.txt
+├── opgave1.cob
+├── opgave2.cob
+├── opgave3_clean_code.cob
+├── opgave3.cob
+├── opgave4.cob
+├── opgave5
+│   ├── KUNDEOPL.cpy
+│   └── opgave5.cob
+├── opgave6.cob
+├── opgave7
+│   ├── KundeoplysningerOut.txt
+│   ├── Kundeoplysninger.txt
+│   └── opgave7.cob
+├── opgave8
+│   ├── KONTOOPL.cpy
+│   ├── KontoOpl.txt
+│   ├── KUNDEKONTO.txt
+│   └── opgave8.cob
+└── README.md
 ```
 
 # 🛠️ Installation on Linux
