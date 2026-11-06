@@ -1,2 +1,5 @@
 # Compiled code.
 /dist
+
+# Scripts
+GenInputData.py
