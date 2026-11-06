@@ -30,15 +30,15 @@
                READ INPUT-FILE INTO INPUT-RECORD
                AT END 
                    MOVE "Y" TO END-OF-FILE
-               NOT AT END 
-                   DISPLAY " "
+               NOT AT END
+                   DISPLAY KUNDE-ID OF INPUT-RECORD
                END-READ
                
            END-PERFORM.
 
-           DISPLAY INPUT-RECORD.
            
            CLOSE INPUT-FILE.
            CLOSE OUTPUT-FILE.
            
            STOP RUN.
+
