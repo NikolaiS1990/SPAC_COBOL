@@ -1,0 +1,10 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASSIGNMENT10.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE DIVISION.
+
+       DISPLAY OUTPUT
+
+      * Use JUSTIFIED RIGHT to add text to the right side of the A4 sheet
