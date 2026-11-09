@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. ASSIGNMENT2.
+       PROGRAM-ID. ASSIGNMENT3.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
       * Allocate space for variables in memory.
