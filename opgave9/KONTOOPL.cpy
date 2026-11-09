@@ -1,0 +1,5 @@
+       02 KUNDE-ID PIC 9(11).
+       02 KONTO-ID PIC X(17).
+       02 KONTO-TYPE PIC X(10).
+       02 BALANCE PIC 9(5)V99.
+       02 VALUTA-KD PIC X(4).
