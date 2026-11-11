@@ -17,6 +17,8 @@
        01 EOF-FLAG             PIC X VALUE "N".
        01 NUMBER-OF-LINES      PIC 9(3) VALUE 0.
        01 TABLE-INDEX          PIC 9(3) VALUE 0.
+       01 UNIQUE-COUNT         PIC 9(3) VALUE 0.
+       01 PREV-REG-NR          PIC 9(4) VALUE 9999.
 
        *> In-memory table matching copybook layout exactly
        01 BANK-TABLE.
@@ -27,11 +29,20 @@
                10 TB-BANKNAVN   PIC X(30).
                10 TB-BANKADRESSE PIC X(50).
                10 TB-TELEFON    PIC X(15).
-               10 TB-EMAIL      PIC X(37).
+               10 TB-EMAIL      PIC X(33).
+
+       01 UNIQUE-TABLE.
+           05 UNIQUE-ENTRY OCCURS 1 TO 999 TIMES
+               DEPENDING ON UNIQUE-COUNT.
+               10 UNQ-REG-NR     PIC 9(4).
+               10 UNQ-BANKNAVN   PIC X(30).
+               10 UNQ-BANKADRESSE PIC X(50).
+               10 UNQ-TELEFON    PIC X(15).
+               10 UNQ-EMAIL      PIC X(33).
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
-           *> 1. Count lines to size the table
+      *> 1. Count lines to size the table
            OPEN INPUT BANK-FILE.
            PERFORM UNTIL EOF-FLAG = "Y"
                READ BANK-FILE
@@ -44,7 +55,7 @@
            END-PERFORM.
            CLOSE BANK-FILE.
            
-           *> 2. Load records directly into the table variable
+      *> 2. Load records directly into the table variable
            OPEN INPUT BANK-FILE.
            MOVE "N" TO EOF-FLAG
            MOVE 0 TO TABLE-INDEX
@@ -62,10 +73,22 @@
 
            SORT BANK-ENTRY ON ASCENDING KEY TB-REG-NR.
 
-           *> 4. Display sorted results straight from the variable
+      *> Remove potential duplicates
+           MOVE 0 TO UNIQUE-COUNT
            PERFORM VARYING TABLE-INDEX FROM 1 BY 1 
                    UNTIL TABLE-INDEX > NUMBER-OF-LINES
-               DISPLAY BANK-ENTRY(TABLE-INDEX)
+               IF TB-REG-NR(TABLE-INDEX) NOT = PREV-REG-NR
+                   ADD 1 TO UNIQUE-COUNT
+                   MOVE BANK-ENTRY(TABLE-INDEX) TO
+                       UNIQUE-ENTRY(UNIQUE-COUNT)
+                   MOVE TB-REG-NR(TABLE-INDEX) TO PREV-REG-NR
+               END-IF
+           END-PERFORM.
+
+      *> Display clean unique records natively without any pipes
+           PERFORM VARYING TABLE-INDEX FROM 1 BY 1 
+                   UNTIL TABLE-INDEX > UNIQUE-COUNT
+               DISPLAY UNIQUE-ENTRY(TABLE-INDEX)
            END-PERFORM.
 
            STOP RUN.
