@@ -130,10 +130,14 @@ mkdir dist
 # ⚙️ Compilation and Execution
 Now you are ready to code and compile scripts.
 
-Compile script
+Compile the main module:
 
 ```bash
 cobc -x Hello.cob
+```
+Compile sub modules:
+```bash
+cobc -m Hello.cob
 ```
 
 Add the `-fixed` flag if it needs to comply with column rules. You can also add `-free` if you are writing modern COBOL and columns do not matter.
