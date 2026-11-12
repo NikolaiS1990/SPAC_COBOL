@@ -1,0 +1,40 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. TRANSACTION-HANDLER.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT TRANSACTION-FILE ASSIGN TO
+               "Transaktioner_small_sample.txt"
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD TRANSACTION-FILE
+       01 TRANSACTION-RECORD.
+           COPY "transaktioner-strukt.cpy".
+           
+       WORKING-STORAGE SECTION.
+       
+       01 EOF-FLAG PIC X VALUE  "N".
+       01 NUMBER-OF-LINES PIC 9(3) VALUE 0.
+       01 TABLE-INDEX PIC 9(3) VALUE 0.
+       01 UNIQUE-COUTN PIC 9(3) VALUE 0.
+       01 PREV-CPR-NR PIC X(11) VALUE SPACES.
+
+      *> JSON LENGTH & POINTER
+       01 JSON-BUFFER PIC X(100000) VALUE SPACES.
+       01 PTR PIC 9(5) VALUE 1.
+       01 JSON-LEN PIC 9(5) 0.
+
+      *> Working fields FOR trimming
+       01 WS-CPR PIC X(15)
+       01 WS-NAVN PIC X(30)
+       01 WS-ADRESSE PIC X(50)
+       01 WS-FØDSELSDATO PIC X(10)
+       01 WS-KONTO-ID PIC X(15)
+       01 WS-REG-NR PIC 9(4)
+       01 WS-BELØB PIC 9(11)V99
+       01 WS-VALUTA PIC 9(3)
+       01 WS-TRANSAKTIONSTYPE PIC X(15)
+       01 WS-BUTIK PIC X(20)
+       01 WS-TIDSPUNKT PIC X(26)

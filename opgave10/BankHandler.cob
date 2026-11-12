@@ -20,18 +20,18 @@
        01 UNIQUE-COUNT         PIC 9(3) VALUE 0.
        01 PREV-REG-NR          PIC 9(4) VALUE 9999.
 
-       *> JSON LENGTH & POINTER
+      *> JSON LENGTH & POINTER
        01 JSON-BUFFER          PIC X(32000) VALUE SPACES.
        01 PTR                  PIC 9(5) VALUE 1.
        01 JSON-LEN             PIC 9(5) VALUE 0.
 
-       *> Working fields for trimming
+      *> Working fields for trimming
        01 WS-NAVN              PIC X(30).
        01 WS-ADRESSE           PIC X(50).
        01 WS-TLF               PIC X(15).
        01 WS-EMAIL             PIC X(33).
 
-       *> In-memory table matching copybook layout exactly
+      *> In-memory table matching copybook layout exactly
        01 BANK-TABLE.
            05 BANK-ENTRY OCCURS 1 TO 999 TIMES
                DEPENDING ON NUMBER-OF-LINES
