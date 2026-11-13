@@ -3,4 +3,3 @@
            02 BANKADRESSE PIC X(50).
            02 TELEFON PIC X(15).
            02 EMAIL PIC X(33).
-
