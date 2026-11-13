@@ -19,7 +19,7 @@
        01 WS-NUMBER-OF-LINES PIC 9(3) VALUE 0.
        01 WS-TABLE-INDEX PIC 9(3) VALUE 0.
        01 WS-UNIQUE-COUNT PIC 9(3) VALUE 0.
-       01 WS-PREV-CPR-NR PIC X(11) VALUE SPACES.
+       01 WS-PREV-CPR PIC X(11) VALUE SPACES.
 
       *> JSON LENGTH & POINTER
        01 WS-JSON-BUFFER PIC X(100000) VALUE SPACES.
@@ -108,4 +108,51 @@
            CLOSE TRANSACTION-FILE.
 
            SORT WS-TRANSACTION-ENTRY ON ASCENDING KEY WS-TB-CPR.
-           
+
+      *> Remove potential DUPLICATES
+           MOVE 0 TO WS-UNIQUE-COUNT
+           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1
+                   UNTIL WS-TABLE-INDEX > WS-NUMBER-OF-LINES
+               IF WS-TB-CPR(WS-TABLE-INDEX) NOT = WS-PREV-CPR
+                   ADD 1 TO WS-UNIQUE-COUNT
+                   
+                   MOVE WS-TB-CPR(WS-TABLE-INDEX)
+                       TO WS-UNQ-CPR(WS-UNIQUE-COUNT)
+                   
+                   MOVE FUNCTION TRIM(WS-TB-NAVN(WS-TABLE-INDEX))
+                       TO WS-UNQ-NAVN(WS-UNIQUE-COUNT)
+                   
+                   MOVE FUNCTION TRIM(WS-TB-ADRESSE(WS-TABLE-INDEX))
+                       TO WS-UNQ-ADRESSE(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION
+                       TRIM(WS-TB-FØDSELSDATO(WS-TABLE-INDEX))
+                       TO WS-UNQ-FØDSELSDATO(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-KONTO-ID(WS-TABLE-INDEX))
+                       TO WS-UNQ-KONTO-ID(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-REG-NR(WS-TABLE-INDEX))
+                       TO WS-UNQ-REG-NR(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-BELØB(WS-TABLE-INDEX))
+                       TO WS-UNQ-BELØB(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-VALUTA(WS-TABLE-INDEX))
+                       TO WS-UNQ-VALUTA(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION
+                       TRIM(WS-TB-TRANSAKTIONSTYPE(WS-TABLE-INDEX))
+                       TO WS-UNQ-TRANSAKTIONSTYPE(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-BUTIK(WS-TABLE-INDEX))
+                       TO WS-UNQ-BUTIK(WS-UNIQUE-COUNT)
+
+                   MOVE FUNCTION TRIM(WS-TB-TIDSPUNKT(WS-TABLE-INDEX))
+                       TO WS-UNQ-TIDSPUNKT(WS-UNIQUE-COUNT)
+
+                   MOVE WS-TB-CPR(WS-TABLE-INDEX)
+                       TO WS-PREV-CPR
+
+               END-IF 
+           END-PERFORM.
