@@ -14,7 +14,6 @@
            COPY "transaktioner-strukt.cpy".
 
        WORKING-STORAGE SECTION.
-       
        01 WS-EOF-FLAG PIC X VALUE "N".
        01 WS-NUMBER-OF-LINES PIC 9(3) VALUE 0.
        01 WS-TABLE-INDEX PIC 9(3) VALUE 0.
@@ -26,18 +25,18 @@
        01 WS-PTR PIC 9(5) VALUE 1.
        01 WS-JSON-LEN PIC 9(5) VALUE 0.
 
-      *> Working fields for trimming
-       01 WS-CPR PIC X(15).
-       01 WS-NAVN PIC X(30).
-       01 WS-ADRESSE PIC X(50).
-       01 WS-FØDSELSDATO PIC X(10).
+      *> Working fields for trimming in the JSON construction
+       01 WS-CPR PIC X(16).
+       01 WS-NAVN PIC X(31).
+       01 WS-ADRESSE PIC X(51).
+       01 WS-FØDSELSDATO PIC X(12).
        01 WS-KONTO-ID PIC X(15).
-       01 WS-REG-NR PIC 9(4).
-       01 WS-BELØB PIC 9(11)V99.
+       01 WS-REG-NR PIC 9(13).
+       01 WS-BELØB PIC 9(01)V99.
        01 WS-VALUTA PIC 9(3).
-       01 WS-TRANSAKTIONSTYPE PIC X(15).
-       01 WS-BUTIK PIC X(20).
-       01 WS-TIDSPUNKT PIC X(26).
+       01 WS-TRANSAKTIONSTYPE PIC X(21).
+       01 WS-BUTIK PIC X(21).
+       01 WS-TIDSPUNKT PIC X(27).
  
       *> In-memory TABLE matching copybook layout exactly
        01 WS-TRANSACTION-TABLE.
@@ -45,32 +44,32 @@
            DEPENDING ON WS-NUMBER-OF-LINES
            ASCENDING key IS WS-TB-CPR.
            10 WS-TB-CPR PIC X(15).
-           10 WS-TB-NAVN PIC X(30).
-           10 WS-TB-ADRESSE PIC X(50).
-           10 WS-TB-FØDSELSDATO PIC X(10).
+           10 WS-TB-NAVN PIC X(31).
+           10 WS-TB-ADRESSE PIC X(51).
+           10 WS-TB-FØDSELSDATO PIC X(12).
            10 WS-TB-KONTO-ID PIC X(15).
-           10 WS-TB-REG-NR PIC 9(4).
-           10 WS-TB-BELØB PIC 9(11)V99.
+           10 WS-TB-REG-NR PIC 9(13).
+           10 WS-TB-BELØB PIC 9(10)V99.
            10 WS-TB-VALUTA PIC 9(3).
-           10 WS-TB-TRANSAKTIONSTYPE PIC X(15).
-           10 WS-TB-BUTIK PIC X(20).
-           10 WS-TB-TIDSPUNKT PIC X(26).
+           10 WS-TB-TRANSAKTIONSTYPE PIC X(21).
+           10 WS-TB-BUTIK PIC X(21).
+           10 WS-TB-TIDSPUNKT PIC X(27).
 
        01 UNIQUE-TABLE.
-           05 UNIQUE-ENTRY OCCURS 1 TO 999 TIMES
+           05 WS-UNIQUE-ENTRY OCCURS 1 TO 999 TIMES
            DEPENDING ON WS-UNIQUE-COUNT
            ASCENDING key IS WS-UNQ-CPR.
            10 WS-UNQ-CPR PIC X(15).
-           10 WS-UNQ-NAVN PIC X(30).
-           10 WS-UNQ-ADRESSE PIC X(50).
-           10 WS-UNQ-FØDSELSDATO PIC X(10).
+           10 WS-UNQ-NAVN PIC X(31).
+           10 WS-UNQ-ADRESSE PIC X(51).
+           10 WS-UNQ-FØDSELSDATO PIC X(12).
            10 WS-UNQ-KONTO-ID PIC X(15).
-           10 WS-UNQ-REG-NR PIC 9(4).
-           10 WS-UNQ-BELØB PIC 9(11)V99.
+           10 WS-UNQ-REG-NR PIC 9(13).
+           10 WS-UNQ-BELØB PIC 9(10)V99.
            10 WS-UNQ-VALUTA PIC 9(3).
-           10 WS-UNQ-TRANSAKTIONSTYPE PIC X(15).
-           10 WS-UNQ-BUTIK PIC X(20).
-           10 WS-UNQ-TIDSPUNKT PIC X(26).
+           10 WS-UNQ-TRANSAKTIONSTYPE PIC X(21).
+           10 WS-UNQ-BUTIK PIC X(21).
+           10 WS-UNQ-TIDSPUNKT PIC X(27).
 
       *> LINKAGE SECTION.
       *>01 LK-JSON-OUT          PIC X(17979).
@@ -92,6 +91,11 @@
                END-READ
            END-PERFORM.
            CLOSE TRANSACTION-FILE.
+
+      *> Load RECORDS directly INTO the TABLE variable
+           OPEN INPUT TRANSACTION-FILE
+           MOVE "N" TO WS-EOF-FLAG
+           MOVE 0 TO WS-TABLE-INDEX
 
            PERFORM UNTIL WS-EOF-FLAG = "Y"
                READ TRANSACTION-FILE INTO TRANSACTION-RECORD
@@ -116,7 +120,7 @@
                IF WS-TB-CPR(WS-TABLE-INDEX) NOT = WS-PREV-CPR
                    ADD 1 TO WS-UNIQUE-COUNT
                    
-                   MOVE WS-TB-CPR(WS-TABLE-INDEX)
+                   MOVE FUNCTION TRIM(WS-TB-CPR(WS-TABLE-INDEX))
                        TO WS-UNQ-CPR(WS-UNIQUE-COUNT)
                    
                    MOVE FUNCTION TRIM(WS-TB-NAVN(WS-TABLE-INDEX))
@@ -155,4 +159,20 @@
                        TO WS-PREV-CPR
 
                END-IF 
+           END-PERFORM.
+
+
+      *> Display clean unique records natively without any pipes
+           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1 
+                   UNTIL WS-TABLE-INDEX > WS-NUMBER-OF-LINES
+               DISPLAY WS-TRANSACTION-ENTRY(WS-TABLE-INDEX)
+           END-PERFORM.
+
+       DISPLAY SPACES
+       DISPLAY SPACES
+
+      *> Display clean unique records natively without any pipes
+           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1 
+                   UNTIL WS-TABLE-INDEX > WS-UNIQUE-COUNT
+               DISPLAY WS-UNIQUE-ENTRY(WS-TABLE-INDEX)
            END-PERFORM.
