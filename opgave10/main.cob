@@ -8,23 +8,28 @@
        01 JSON-SPEC.
            COPY "json-spec.cpy".
        COPY "json-buffer.cpy".
-       01 JSON-LEN                 PIC 9(8).
+       01 JSON-LEN                 PIC 9(8) VALUE ZEROS.
 
-      *> Input for ADD-FILE.
-       01 NEW-FILE-NAME            PIC X(256).
-       01 NEW-JSON-NAME            PIC X(50).
-       01 NEW-KEY-FIELD            PIC 9(2).
+      *> Input for ADD-FILE paragraph.
+       01 NEW-FILE-NAME            PIC X(256) VALUE SPACES.
+       01 NEW-JSON-NAME            PIC X(50) VALUE SPACES.
+       01 NEW-KEY-FIELD            PIC 9(2) VALUE ZEROS.
 
-      *> Input for ADD-FIELD: "<json key> <start> <width> <type>",
+      *> Input for ADD-FIELD: paragraph. 
+      *> "<json key> <start> <width> <type>",
       *> separated by spaces. Type S = text, N = number.
-       01 NEW-FIELD                PIC X(80).
-       01 NF-NAME                  PIC X(50).
-       01 NF-START                 PIC X(10).
-       01 NF-WIDTH                 PIC X(10).
-       01 NF-TYPE                  PIC X(10).
+       01 NEW-FIELD                PIC X(80) VALUE SPACES.
+       01 NF-NAME                  PIC X(50) VALUE SPACES.
+       01 NF-START                 PIC X(10) VALUE SPACES.
+       01 NF-WIDTH                 PIC X(10) VALUE SPACES.
+       01 NF-TYPE                  PIC X(1) VALUE SPACES.
 
-       01 WS-F                     PIC 9(2).
-       01 WS-N                     PIC 9(2).
+      *> Index number of the file currently being filled in:
+      *> 1 for Banker.txt, 2 for the transactions.
+       01 WS-F                     PIC 9(3) VALUE ZEROS.
+      *> Index number of the field within that file: 1 for reg_nr,
+      *> 2 for banknavn, and so on.
+       01 WS-N                     PIC 9(3) VALUE ZEROS.
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -74,11 +79,11 @@
            MOVE "tidspunkt        186  26 S" TO NEW-FIELD
            PERFORM ADD-FIELD
 
-           CALL "FILES-TO-JSON" USING JSON-SPEC JSON-OUT JSON-LEN
+           CALL "FILES-TO-JSON" USING JSON-SPEC JSON-BUFFER JSON-LEN
            END-CALL
 
            IF JSON-LEN > 0
-               DISPLAY JSON-OUT(1:JSON-LEN)
+               DISPLAY JSON-BUFFER(1:JSON-LEN)
            ELSE
                DISPLAY "No JSON was returned"
            END-IF

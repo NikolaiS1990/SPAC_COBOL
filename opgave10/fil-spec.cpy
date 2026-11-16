@@ -3,16 +3,23 @@
            10 SPEC-FILE-NAME       PIC X(256).
       *> The key this file's data gets in the JSON, e.g. "banker".
            10 SPEC-JSON-NAME       PIC X(50).
-      *> 0: the lines become a JSON array of objects.
-      *> n: the lines become a JSON object keyed by field n
-      *>    (field n is then not repeated inside each object).
+      
+      *> If set to 1, it the unique parts of the text file (such
+      *> as the reg number), will be used as a key in the JSON.
+      *> If set to 0, the JSON will be structured differently.
            10 SPEC-KEY-FIELD       PIC 9(2).
+
            10 SPEC-FIELD-COUNT     PIC 9(2).
-      *> For each field: JSON key, first character column (1 = the
-      *> first character of the line), width in characters and
-      *> type: S = text, N = number.
+
+        *> One entry per field in a line of the file.
            10 SPEC-FIELD OCCURS 20 TIMES.
-               15 SF-NAME          PIC X(50).
-               15 SF-START         PIC 9(3).
-               15 SF-WIDTH         PIC 9(3).
-               15 SF-TYPE          PIC X.
+        *> The name the field gets in the JSON, e.g. "banknavn".
+                 15 SF-NAME          PIC X(50).
+        *> Position of the field's first character in the line,
+        *> e.g. 5 for banknavn, because reg_nr fills 1 to 4.
+                 15 SF-START         PIC 9(3).
+        *> Number of characters in the field, e.g. 30 for banknavn.
+                 15 SF-WIDTH         PIC 9(3).
+        *> S if the value is text, N if it is a number, e.g. S for
+        *> banknavn and N for beløb in the transactions.
+                 15 SF-TYPE          PIC X.
