@@ -5,25 +5,31 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT TRANSACTION-FILE ASSIGN TO "Trans_sml_samp.txt"
-               ORGANIZATION IS LINE SEQUENTIAL.
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS WS-FILE-STATUS.
+           SELECT SORT-FILE ASSIGN TO "sortwork".
 
        DATA DIVISION.
        FILE SECTION.
+      *> Each line is read as one whole field, so duplicates are found
+      *> by comparing complete lines. 250 is wider than the longest
+      *> line in Transaktioner.txt (216 bytes); shorter lines are
+      *> padded with spaces.
        FD TRANSACTION-FILE.
-       01 TRANSACTION-RECORD.
-           COPY "transaktioner-strukt.cpy".
+       01 TRANSACTION-LINE     PIC X(250).
+
+       SD SORT-FILE.
+       01 SORT-LINE            PIC X(250).
 
        WORKING-STORAGE SECTION.
-       01 WS-EOF-FLAG PIC X VALUE "N".
-       01 WS-NUMBER-OF-LINES PIC 9(3) VALUE 0.
-       01 WS-TABLE-INDEX PIC 9(3) VALUE 0.
-       01 WS-UNIQUE-COUNT PIC 9(3) VALUE 0.
-       01 WS-PREV-CPR PIC X(11) VALUE SPACES.
-
-      *> JSON LENGTH & POINTER
-       01 WS-JSON-BUFFER PIC X(100000) VALUE SPACES.
-       01 WS-PTR PIC 9(5) VALUE 1.
-       01 WS-JSON-LEN PIC 9(5) VALUE 0.
+       01 WS-FILE-STATUS       PIC XX.
+       01 WS-EOF-FLAG          PIC X VALUE "N".
+      *> LOW-VALUES never equals a real line, so the first line
+      *> is never treated as a duplicate.
+       01 WS-PREV-LINE         PIC X(250) VALUE LOW-VALUES.
+       01 WS-LINES-READ        PIC 9(7) VALUE 0.
+       01 WS-UNIQUE-COUNT      PIC 9(7) VALUE 0.
+       01 WS-DUPLICATE-COUNT   PIC 9(7) VALUE 0.
 
       *> Working fields for trimming in the JSON construction
        01 WS-CPR PIC X(16).
@@ -37,39 +43,6 @@
        01 WS-TRANSAKTIONSTYPE PIC X(21).
        01 WS-BUTIK PIC X(21).
        01 WS-TIDSPUNKT PIC X(27).
- 
-      *> In-memory TABLE matching copybook layout exactly
-       01 WS-TRANSACTION-TABLE.
-           05 WS-TRANSACTION-ENTRY OCCURS 1 TO 999 TIMES
-           DEPENDING ON WS-NUMBER-OF-LINES
-           ASCENDING key IS WS-TB-CPR.
-           10 WS-TB-CPR PIC X(15).
-           10 WS-TB-NAVN PIC X(31).
-           10 WS-TB-ADRESSE PIC X(51).
-           10 WS-TB-FØDSELSDATO PIC X(12).
-           10 WS-TB-KONTO-ID PIC X(15).
-           10 WS-TB-REG-NR PIC 9(13).
-           10 WS-TB-BELØB PIC 9(10)V99.
-           10 WS-TB-VALUTA PIC 9(3).
-           10 WS-TB-TRANSAKTIONSTYPE PIC X(21).
-           10 WS-TB-BUTIK PIC X(21).
-           10 WS-TB-TIDSPUNKT PIC X(27).
-
-       01 UNIQUE-TABLE.
-           05 WS-UNIQUE-ENTRY OCCURS 1 TO 999 TIMES
-           DEPENDING ON WS-UNIQUE-COUNT
-           ASCENDING key IS WS-UNQ-CPR.
-           10 WS-UNQ-CPR PIC X(15).
-           10 WS-UNQ-NAVN PIC X(31).
-           10 WS-UNQ-ADRESSE PIC X(51).
-           10 WS-UNQ-FØDSELSDATO PIC X(12).
-           10 WS-UNQ-KONTO-ID PIC X(15).
-           10 WS-UNQ-REG-NR PIC 9(13).
-           10 WS-UNQ-BELØB PIC 9(10)V99.
-           10 WS-UNQ-VALUTA PIC 9(3).
-           10 WS-UNQ-TRANSAKTIONSTYPE PIC X(21).
-           10 WS-UNQ-BUTIK PIC X(21).
-           10 WS-UNQ-TIDSPUNKT PIC X(27).
 
       *> LINKAGE SECTION.
       *>01 LK-JSON-OUT          PIC X(17979).
@@ -78,101 +51,59 @@
       *>PROCEDURE DIVISION USING LK-JSON-OUT LK-JSON-LEN.
        PROCEDURE DIVISION.
        MAIN-LOGIC.
-      *> COUNT LINES TO SIZE the TABLE
-           OPEN INPUT TRANSACTION-FILE.
+      *> Sorting on the whole line puts identical lines next to each
+      *> other, wherever they were in the file. Then a duplicate is
+      *> simply a line that equals the line before it.
+           SORT SORT-FILE ON ASCENDING KEY SORT-LINE
+               INPUT PROCEDURE IS READ-TRANSACTIONS
+               OUTPUT PROCEDURE IS REMOVE-DUPLICATES
+
+           DISPLAY SPACES
+           DISPLAY "Lines read:         " WS-LINES-READ
+           DISPLAY "Unique lines:       " WS-UNIQUE-COUNT
+           DISPLAY "Duplicates removed: " WS-DUPLICATE-COUNT
+
+           STOP RUN.
+
+      *> Read every non-blank line and hand it to the sort.
+       READ-TRANSACTIONS.
+           OPEN INPUT TRANSACTION-FILE
+           IF WS-FILE-STATUS NOT = "00"
+               DISPLAY "Cannot open transaction file, status "
+                   WS-FILE-STATUS
+               STOP RUN
+           END-IF
+
+           MOVE "N" TO WS-EOF-FLAG
            PERFORM UNTIL WS-EOF-FLAG = "Y"
                READ TRANSACTION-FILE
-               AT END 
-                   MOVE "Y" TO WS-EOF-FLAG
-               NOT AT END 
-                   IF TRANSACTION-RECORD NOT = SPACES
-                       ADD 1 TO WS-NUMBER-OF-LINES
-                   END-IF 
+                   AT END
+                       MOVE "Y" TO WS-EOF-FLAG
+                   NOT AT END
+                       IF TRANSACTION-LINE NOT = SPACES
+                           ADD 1 TO WS-LINES-READ
+                           RELEASE SORT-LINE FROM TRANSACTION-LINE
+                       END-IF
                END-READ
-           END-PERFORM.
+           END-PERFORM
+
            CLOSE TRANSACTION-FILE.
 
-      *> Load RECORDS directly INTO the TABLE variable
-           OPEN INPUT TRANSACTION-FILE
+      *> Receive the lines in sorted order and keep only the first
+      *> copy of each.
+       REMOVE-DUPLICATES.
            MOVE "N" TO WS-EOF-FLAG
-           MOVE 0 TO WS-TABLE-INDEX
-
            PERFORM UNTIL WS-EOF-FLAG = "Y"
-               READ TRANSACTION-FILE INTO TRANSACTION-RECORD
-               AT END 
-                   MOVE "Y" TO WS-EOF-FLAG
-               NOT AT END 
-                   IF TRANSACTION-RECORD NOT = SPACES
-                       ADD 1 TO WS-TABLE-INDEX
-                   MOVE TRANSACTION-RECORD TO
-                       WS-TRANSACTION-ENTRY(WS-TABLE-INDEX)
-                   END-IF
-               END-READ
-           END-PERFORM.
-           CLOSE TRANSACTION-FILE.
-
-           SORT WS-TRANSACTION-ENTRY ON ASCENDING KEY WS-TB-CPR.
-
-      *> Remove potential DUPLICATES
-           MOVE 0 TO WS-UNIQUE-COUNT
-           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1
-                   UNTIL WS-TABLE-INDEX > WS-NUMBER-OF-LINES
-               IF WS-TB-CPR(WS-TABLE-INDEX) NOT = WS-PREV-CPR
-                   ADD 1 TO WS-UNIQUE-COUNT
-                   
-                   MOVE FUNCTION TRIM(WS-TB-CPR(WS-TABLE-INDEX))
-                       TO WS-UNQ-CPR(WS-UNIQUE-COUNT)
-                   
-                   MOVE FUNCTION TRIM(WS-TB-NAVN(WS-TABLE-INDEX))
-                       TO WS-UNQ-NAVN(WS-UNIQUE-COUNT)
-                   
-                   MOVE FUNCTION TRIM(WS-TB-ADRESSE(WS-TABLE-INDEX))
-                       TO WS-UNQ-ADRESSE(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION
-                       TRIM(WS-TB-FØDSELSDATO(WS-TABLE-INDEX))
-                       TO WS-UNQ-FØDSELSDATO(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-KONTO-ID(WS-TABLE-INDEX))
-                       TO WS-UNQ-KONTO-ID(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-REG-NR(WS-TABLE-INDEX))
-                       TO WS-UNQ-REG-NR(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-BELØB(WS-TABLE-INDEX))
-                       TO WS-UNQ-BELØB(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-VALUTA(WS-TABLE-INDEX))
-                       TO WS-UNQ-VALUTA(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION
-                       TRIM(WS-TB-TRANSAKTIONSTYPE(WS-TABLE-INDEX))
-                       TO WS-UNQ-TRANSAKTIONSTYPE(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-BUTIK(WS-TABLE-INDEX))
-                       TO WS-UNQ-BUTIK(WS-UNIQUE-COUNT)
-
-                   MOVE FUNCTION TRIM(WS-TB-TIDSPUNKT(WS-TABLE-INDEX))
-                       TO WS-UNQ-TIDSPUNKT(WS-UNIQUE-COUNT)
-
-                   MOVE WS-TB-CPR(WS-TABLE-INDEX)
-                       TO WS-PREV-CPR
-
-               END-IF 
-           END-PERFORM.
-
-
-      *> Display clean unique records natively without any pipes
-           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1 
-                   UNTIL WS-TABLE-INDEX > WS-NUMBER-OF-LINES
-               DISPLAY WS-TRANSACTION-ENTRY(WS-TABLE-INDEX)
-           END-PERFORM.
-
-       DISPLAY SPACES
-       DISPLAY SPACES
-
-      *> Display clean unique records natively without any pipes
-           PERFORM VARYING WS-TABLE-INDEX FROM 1 BY 1 
-                   UNTIL WS-TABLE-INDEX > WS-UNIQUE-COUNT
-               DISPLAY WS-UNIQUE-ENTRY(WS-TABLE-INDEX)
+               RETURN SORT-FILE
+                   AT END
+                       MOVE "Y" TO WS-EOF-FLAG
+                   NOT AT END
+                       IF SORT-LINE = WS-PREV-LINE
+                           ADD 1 TO WS-DUPLICATE-COUNT
+                       ELSE
+                           ADD 1 TO WS-UNIQUE-COUNT
+                           DISPLAY FUNCTION TRIM(SORT-LINE TRAILING)
+                           MOVE SORT-LINE TO WS-PREV-LINE
+                       END-IF
+               END-RETURN
            END-PERFORM.
