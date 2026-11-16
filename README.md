@@ -140,6 +140,11 @@ Compile sub modules:
 cobc -m Hello.cob
 ```
 
+Compile main module together with sub modules
+```bash
+cobc -x -o main main.cob submodule.cob
+```
+
 Add the `-fixed` flag if it needs to comply with column rules. You can also add `-free` if you are writing modern COBOL and columns do not matter.
 
 Run the compiled file
