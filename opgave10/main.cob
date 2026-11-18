@@ -36,6 +36,16 @@
            MOVE 0 TO SPEC-FILE-COUNT
 
       *> Banker.txt: one object per bank, keyed by reg_nr (field 1)
+
+      *> The text holds four values separated by spaces,
+      *> and together they describe one field in the file ie:
+
+      *> "reg_nr             1   4 S"
+      *>  ──┬───   ┬   ┬ ┬
+      *>    │      │   │ └─ type:  S = text (N = number)
+      *>    │      │   └─── width: the field is 4 characters long
+      *>    │      └─────── start: it begins at character 1 of the line
+      *>    └─────────────────── the key the field gets in the JSON
            MOVE "Banker.txt"            TO NEW-FILE-NAME
            MOVE "banker"                TO NEW-JSON-NAME
            MOVE 1                       TO NEW-KEY-FIELD
