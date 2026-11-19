@@ -129,7 +129,13 @@
                INTO NF-NAME NF-START NF-WIDTH NF-TYPE
            END-UNSTRING
 
+
            MOVE NF-NAME                  TO SF-NAME(WS-F WS-N)
+      *> NUMVAL turns chars like 9 into integers. If there
+      *> is spaces, they will be turned into one or more 0's
+      *> If you don't use PIC, GnuCOBOL will give 000000000.
            MOVE FUNCTION NUMVAL(NF-START) TO SF-START(WS-F WS-N)
            MOVE FUNCTION NUMVAL(NF-WIDTH) TO SF-WIDTH(WS-F WS-N)
            MOVE NF-TYPE                  TO SF-TYPE(WS-F WS-N).
+
+           DISPLAY SF-WIDTH(WS-F WS-N)

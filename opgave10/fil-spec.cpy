@@ -1,5 +1,11 @@
-      *> One text file and the layout of its lines.
-      *> Used inside json-spec.cpy, and by TextFileToJson.cob.
+      *> This copybook allows main.cob to describe an input file.
+      *> main.cob can describe the name of the input file and where
+      *> each field begins and ends.
+      *> From main.cob it also gets the (SPEC-JSON-NAME, SF-NAME) and
+      *> the types (SF-TYPE).
+
+      *> It is also used inside json-spec.cpy, and TextFileToJson.cob.
+
            10 SPEC-FILE-NAME       PIC X(256).
       *> The key this file's data gets in the JSON, e.g. "banker".
            10 SPEC-JSON-NAME       PIC X(50).
