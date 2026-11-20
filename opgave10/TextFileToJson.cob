@@ -1,7 +1,7 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. TEXT-FILE-TO-JSON.
       *> Reads one fixed-width text file, removes duplicate lines with
-      *> REMOVE-DUPLICATES and appends the lines as JSON to JSON-OUT,
+      *> REMOVE-DUPLICATES and appends the lines as JSON to JSON-BUFFER,
       *> starting at JSON-PTR. Depending on SPEC-KEY-FIELD:
       *>   0: "<json name>": [ { ... }, { ... } ]
       *>   n: "<json name>": { "<field n>": { ... }, ... }
@@ -14,7 +14,7 @@
       *>   0 = OK
       *>   1 = the file could not be opened
       *>   2 = the file has more lines than LINE-TABLE can hold
-      *>   3 = JSON-OUT is full
+      *>   3 = JSON-BUFFER is full
 
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
@@ -74,7 +74,8 @@
        01 JSON-PTR             PIC 9(8).
        01 LK-RESULT            PIC 9.
 
-       PROCEDURE DIVISION USING FILE-SPEC JSON-OUT JSON-PTR LK-RESULT.
+       PROCEDURE DIVISION USING FILE-SPEC JSON-BUFFER
+           JSON-PTR LK-RESULT.
        MAIN-LOGIC.
            MOVE 0 TO LK-RESULT
            PERFORM READ-INPUT-FILE
@@ -86,17 +87,17 @@
            END-CALL
 
            STRING '  "' FUNCTION TRIM(SPEC-JSON-NAME) '": '
-               DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                ON OVERFLOW MOVE 3 TO LK-RESULT
            END-STRING
            IF SPEC-KEY-FIELD = 0
                STRING '[' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            ELSE
                STRING '{' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
@@ -109,12 +110,12 @@
 
            IF SPEC-KEY-FIELD = 0
                STRING X'0A' '  ]'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            ELSE
                STRING X'0A' '  }'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
@@ -166,26 +167,26 @@
 
            IF WS-LINE-IDX > 1
                STRING ',' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
 
            IF SPEC-KEY-FIELD = 0
                STRING '    {' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            ELSE
                MOVE SPEC-KEY-FIELD TO WS-FIELD-IDX
                PERFORM GET-VALUE
                STRING '    '
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
                PERFORM WRITE-QUOTED-VALUE
                STRING ': {' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
@@ -199,7 +200,7 @@
            END-PERFORM
 
            STRING X'0A' '    }'
-               DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                ON OVERFLOW MOVE 3 TO LK-RESULT
            END-STRING.
 
@@ -212,13 +213,13 @@
                MOVE "N" TO WS-FIRST-FIELD
            ELSE
                STRING ',' X'0A'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
 
            STRING '      "' FUNCTION TRIM(SF-NAME(WS-FIELD-IDX)) '": '
-               DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                ON OVERFLOW MOVE 3 TO LK-RESULT
            END-STRING
 
@@ -227,7 +228,8 @@
            IF SF-TYPE(WS-FIELD-IDX) = "N"
                IF WS-VALUE-LEN = 0
                    STRING 'null'
-                       DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                       DELIMITED BY SIZE INTO JSON-BUFFER
+                           POINTER JSON-PTR
                        ON OVERFLOW MOVE 3 TO LK-RESULT
                    END-STRING
                ELSE
@@ -235,7 +237,7 @@
                    IF WS-IS-NUMBER = "Y"
                        STRING WS-VALUE(1:WS-VALUE-LEN)
                            DELIMITED BY SIZE
-                           INTO JSON-OUT POINTER JSON-PTR
+                           INTO JSON-BUFFER POINTER JSON-PTR
                            ON OVERFLOW MOVE 3 TO LK-RESULT
                        END-STRING
                    ELSE
@@ -249,17 +251,17 @@
       *> Write WS-VALUE as a JSON string: "value"
        WRITE-QUOTED-VALUE.
            STRING '"'
-               DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                ON OVERFLOW MOVE 3 TO LK-RESULT
            END-STRING
            IF WS-VALUE-LEN > 0
                STRING WS-VALUE(1:WS-VALUE-LEN)
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                    ON OVERFLOW MOVE 3 TO LK-RESULT
                END-STRING
            END-IF
            STRING '"'
-               DELIMITED BY SIZE INTO JSON-OUT POINTER JSON-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER JSON-PTR
                ON OVERFLOW MOVE 3 TO LK-RESULT
            END-STRING.
 

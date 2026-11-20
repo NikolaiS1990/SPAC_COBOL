@@ -20,14 +20,14 @@
        COPY "json-buffer.cpy".
        01 JSON-LEN             PIC 9(8).
 
-       PROCEDURE DIVISION USING JSON-SPEC JSON-OUT JSON-LEN.
+       PROCEDURE DIVISION USING JSON-SPEC JSON-BUFFER JSON-LEN.
        MAIN-LOGIC.
            MOVE 1 TO WS-PTR
            MOVE 0 TO WS-RESULT
            MOVE 0 TO JSON-LEN
 
            STRING '{' X'0A'
-               DELIMITED BY SIZE INTO JSON-OUT POINTER WS-PTR
+               DELIMITED BY SIZE INTO JSON-BUFFER POINTER WS-PTR
            END-STRING
 
            PERFORM VARYING WS-FILE-IDX FROM 1 BY 1
@@ -35,21 +35,21 @@
                       OR WS-RESULT NOT = 0
                IF WS-FILE-IDX > 1
                    STRING ',' X'0A'
-                       DELIMITED BY SIZE INTO JSON-OUT POINTER WS-PTR
+                       DELIMITED BY SIZE INTO JSON-BUFFER POINTER WS-PTR
                        ON OVERFLOW MOVE 3 TO WS-RESULT
                    END-STRING
                END-IF
                IF WS-RESULT = 0
                    CALL "TEXT-FILE-TO-JSON"
                        USING FILE-SPEC(WS-FILE-IDX)
-                             JSON-OUT WS-PTR WS-RESULT
+                             JSON-BUFFER WS-PTR WS-RESULT
                    END-CALL
                END-IF
            END-PERFORM
 
            IF WS-RESULT = 0
                STRING X'0A' '}'
-                   DELIMITED BY SIZE INTO JSON-OUT POINTER WS-PTR
+                   DELIMITED BY SIZE INTO JSON-BUFFER POINTER WS-PTR
                    ON OVERFLOW MOVE 3 TO WS-RESULT
                END-STRING
            END-IF
@@ -59,7 +59,7 @@
            ELSE
                IF WS-RESULT = 3
                    DISPLAY "FILES-TO-JSON: the JSON is larger than "
-                       "JSON-OUT"
+                       "JSON-BUFFER"
                END-IF
                DISPLAY "FILES-TO-JSON: no JSON returned"
            END-IF
