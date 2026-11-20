@@ -1,7 +1,7 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
-      *> Tells FILES-TO-JSON which text files to turn into JSON and
-      *> what the fields of each file are, then prints the JSON.
+      *> Tells FILES-TO-JSON which text files to turn into JSONs and
+      *> what the fields of each file are, then prints the JSONs.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
