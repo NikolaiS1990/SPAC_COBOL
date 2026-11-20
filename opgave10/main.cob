@@ -7,8 +7,6 @@
        WORKING-STORAGE SECTION.
        01 JSON-SPEC.
            COPY "json-spec.cpy".
-       COPY "json-buffer.cpy".
-       01 JSON-LEN                 PIC 9(8) VALUE ZEROS.
 
       *> Input for ADD-FILE paragraph.
        01 NEW-FILE-NAME            PIC X(256) VALUE SPACES.
@@ -30,6 +28,11 @@
       *> Index number of the field within that file: 1 for reg_nr,
       *> 2 for banknavn, and so on.
        01 WS-N                     PIC 9(3) VALUE ZEROS.
+
+       01 WS-BANK-JSON PIC X(25000000).
+       01 WS-BANK-JSON_LEN PIC 9(8) VALUE ZEROS.
+       01 WS-TRANSACTION-JSON PIC X(25000000).
+       01 WS-TRANSACTION-JSON_LEN PIC 9(8) VALUE ZEROS.
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -61,6 +64,14 @@
            MOVE "email            100  33 S" TO NEW-FIELD
            PERFORM ADD-FIELD
 
+
+           CALL "FILES-TO-JSON" USING JSON-SPEC WS-BANK-JSON
+               WS-BANK-JSON_LEN
+           END-CALL
+
+           MOVE 0 TO SPEC-FILE-COUNT
+           
+
       *> Transactions: a list of objects (key field 0)
            MOVE "Trans_sml_samp.txt"    TO NEW-FILE-NAME
            MOVE "transaktioner"         TO NEW-JSON-NAME
@@ -89,13 +100,20 @@
            MOVE "tidspunkt        186  26 S" TO NEW-FIELD
            PERFORM ADD-FIELD
 
-           CALL "FILES-TO-JSON" USING JSON-SPEC JSON-BUFFER JSON-LEN
+           CALL "FILES-TO-JSON" USING JSON-SPEC WS-TRANSACTION-JSON
+               WS-TRANSACTION-JSON_LEN
            END-CALL
 
-           IF JSON-LEN > 0
-               DISPLAY JSON-BUFFER(1:JSON-LEN)
+           IF WS-BANK-JSON_LEN > 0
+               DISPLAY WS-BANK-JSON(1:WS-BANK-JSON_LEN)
            ELSE
-               DISPLAY "No JSON was returned"
+               DISPLAY "No BANK-JSON was returned"
+           END-IF
+
+           IF WS-TRANSACTION-JSON_LEN > 0
+               DISPLAY WS-TRANSACTION-JSON(1:WS-TRANSACTION-JSON_LEN)
+           ELSE
+               DISPLAY "No TRANSACTION-JSON was returned"
            END-IF
 
            STOP RUN.
@@ -138,4 +156,4 @@
            MOVE FUNCTION NUMVAL(NF-WIDTH) TO SF-WIDTH(WS-F WS-N)
            MOVE NF-TYPE                  TO SF-TYPE(WS-F WS-N).
 
-           DISPLAY SF-WIDTH(WS-F WS-N)
+           
