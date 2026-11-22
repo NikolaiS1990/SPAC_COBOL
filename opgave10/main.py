@@ -1,5 +1,6 @@
 import subprocess
 import json
+import sys
 from pathlib import Path
 
 """Kunde: [Kundens navn]
@@ -64,20 +65,56 @@ def compile_cobol_main() -> None:
             "FilesToJson.cob",
         ])
 
-if check_if_cobol_files() == False:
-    sys.exit(0)
 
-compile_cobol_main()
+def get_jsons() -> list:
 
-bank_proc = subprocess.run(
-    ["./main", "BANK"], capture_output=True, text=True, check=True
-)
-transaction_proc = subprocess.run(
-    ["./main", "TRANSAKTIONER"], capture_output=True, text=True, check=True
-)
+    bank_proc = subprocess.run(
+        ["./main", "BANK"], capture_output=True, text=True, check=True
+    )
+    transaction_proc = subprocess.run(
+        ["./main", "TRANSAKTIONER"], capture_output=True, text=True, check=True
+    )
 
-bank_data = json.loads(bank_proc.stdout)
-transaction_data = json.loads(transaction_proc.stdout)
+    bank_data = json.loads(bank_proc.stdout)
+    transaction_data = json.loads(transaction_proc.stdout)
 
-print(json.dumps(bank_data, indent=2, ensure_ascii=False))
-print(json.dumps(transaction_data, indent=2, ensure_ascii=False))
+
+    list_of_jsons = [bank_data, transaction_data]
+
+    return list_of_jsons
+
+def get_every_unique_cpr(json) -> list:
+
+    data = json["transaktioner"]
+
+    cpr_numbers = [cpr_number["cpr"] for cpr_number in data]
+
+    unique_cpr_numbers = []
+
+    for item in cpr_numbers:
+        if item not in unique_cpr_numbers:
+            unique_cpr_numbers.append(item)
+
+
+    print(unique_cpr_numbers)
+
+
+    # bank_data = json.dumps(bank_data, indent=2, ensure_ascii=False)
+    # transaction_data =json.dumps(transaction_data, indent=2, ensure_ascii=False)
+
+def run_app() -> None:
+
+    if not check_if_cobol_files():
+        sys.exit(1)
+
+    compile_cobol_main()
+
+    lists_of_jsons = get_jsons()
+
+    bank_json = lists_of_jsons[0]
+    transaction_json = lists_of_jsons[1]
+
+    get_every_unique_cpr(transaction_json)
+
+
+run_app()
