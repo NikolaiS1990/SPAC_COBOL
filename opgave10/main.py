@@ -111,7 +111,7 @@ def generate_pdf(cpr: str, konto_id: str, transactions: list, customer_info: dic
     bank_lines = [
         f"Registreringsnummer: {customer_info.get('reg_nr', 'N/A')}",
         f"Bank: {bank_info.get('banknavn', 'N/A')}",
-        f"Bankadresse: {bank_info.get('bankadresse', 'N/A')}",
+        f"Bankadresse: {bank_info.get('adresse', 'N/A')}",
         f"Telefon: {bank_info.get('telefon', 'N/A')}",
         f"E-mail: {bank_info.get('email', 'N/A')}",
     ]
