@@ -83,24 +83,21 @@ def get_jsons() -> list:
 
     return list_of_jsons
 
-def get_every_unique_cpr(json) -> list:
+def group_transaction_pr_cpr_number(json) -> dict:
 
     data = json["transaktioner"]
 
-    cpr_numbers = [cpr_number["cpr"] for cpr_number in data]
+    grouped = {}
 
-    unique_cpr_numbers = []
+    for transaction in data:
+        cpr = transaction.pop("cpr")
+        if cpr not in grouped:
+            grouped[cpr] = []
+        grouped[cpr].append(transaction)
 
-    for item in cpr_numbers:
-        if item not in unique_cpr_numbers:
-            unique_cpr_numbers.append(item)
+    return grouped
 
 
-    print(unique_cpr_numbers)
-
-
-    # bank_data = json.dumps(bank_data, indent=2, ensure_ascii=False)
-    # transaction_data =json.dumps(transaction_data, indent=2, ensure_ascii=False)
 
 def run_app() -> None:
 
@@ -114,7 +111,8 @@ def run_app() -> None:
     bank_json = lists_of_jsons[0]
     transaction_json = lists_of_jsons[1]
 
-    get_every_unique_cpr(transaction_json)
+    grouped = group_transaction_pr_cpr_number(transaction_json)
+    print(json.dumps(grouped, indent=2, ensure_ascii=False))
 
 
 run_app()
