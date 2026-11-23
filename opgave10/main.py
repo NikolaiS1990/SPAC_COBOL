@@ -5,29 +5,10 @@ from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-
-"""Kunde: [Kundens navn]
-Adresse: [Kundens adresse]
-Registreringsnummer: [REG-NR]
-Bank: [Bankens navn]
-Bankadresse: [Bankens adresse]
-Telefon: [Bankens telefon]
-E-mail: [Bankens e-mail]
-Kontoudskrift for kontonr.: [Kontonummer}
-Dato Tidspunkt Transaktionstype Beløb (DKK) Beløb (valuta) Valutakode Butik
-[En linje per transaktion]
-Totalt indbetalt (DKK): XX,XXX.XX
-Totalt udbetalt (DKK): -XX,XXX.XX
-Saldo (DKK): XX,XXX.XX [Gå ud fra hver kunde havde kr. 50.000 stående inden
-transktionerne]
-Med venlig hilse
-[Bankens navn]"""
-
-
-
 from pathlib import Path
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 main = Path("main").is_file()
 
@@ -117,25 +98,51 @@ def generate_pdf(cpr: str, konto_id: str, transactions: list, customer_info: dic
     elements = []
 
     elements.append(Paragraph("Kontoudskrift", styles['Title']))
+
+
     elements.append(Spacer(1, 5*mm))
 
+    # Customer block (left)
     elements.append(Paragraph(f"Kunde: {customer_info.get('navn', 'N/A')}", styles['Normal']))
     elements.append(Paragraph(f"Adresse: {customer_info.get('adresse', 'N/A')}", styles['Normal']))
-    elements.append(Paragraph(f"CPR: {cpr}", styles['Normal']))
-    elements.append(Paragraph(f"Registreringsnummer: {customer_info.get('reg_nr', 'N/A')}", styles['Normal']))
-    elements.append(Spacer(1, 3*mm))
+    elements.append(Spacer(1, 10*mm))
 
-    elements.append(Paragraph(f"Bank: {bank_info.get('banknavn', 'N/A')}", styles['Normal']))
-    elements.append(Paragraph(f"Bankadresse: {bank_info.get('bankadresse', 'N/A')}", styles['Normal']))
-    elements.append(Paragraph(f"Telefon: {bank_info.get('telefon', 'N/A')}", styles['Normal']))
-    elements.append(Paragraph(f"E-mail: {bank_info.get('email', 'N/A')}", styles['Normal']))
-    elements.append(Spacer(1, 3*mm))
+    # Bank block (right side of page, text left-aligned inside it)
+    bank_lines = [
+        f"Registreringsnummer: {customer_info.get('reg_nr', 'N/A')}",
+        f"Bank: {bank_info.get('banknavn', 'N/A')}",
+        f"Bankadresse: {bank_info.get('bankadresse', 'N/A')}",
+        f"Telefon: {bank_info.get('telefon', 'N/A')}",
+        f"E-mail: {bank_info.get('email', 'N/A')}",
+    ]
 
-    elements.append(Paragraph(f"Kontoudskrift for kontonr.: {konto_id}", styles['Normal']))
+    font = styles['Normal'].fontName
+    size = styles['Normal'].fontSize
+    block_width = max(stringWidth(line, font, size) for line in bank_lines) + 2
+
+    bank_block = Table(
+        [[Paragraph("<br/>".join(bank_lines), styles['Normal'])]],
+        colWidths=[block_width],
+        hAlign='RIGHT',
+    )
+
+    bank_block.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),   # text starts at the same x on every line
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(bank_block)
+    elements.append(Spacer(1, 10*mm))
+
+    bold = ParagraphStyle('Bold', parent=styles['Normal'], fontName='Helvetica-Bold')
+    elements.append(Paragraph(f"Kontoudskrift for kontonr.: {konto_id}", bold))
     elements.append(Spacer(1, 5*mm))
 
     header_data = [["Dato", "Tidspunkt", "Transaktionstype", "Beløb (DKK)", "Beløb (valuta)", "Valutakode", "Butik"]]
-    header_table = Table(header_data, colWidths=[25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 15*mm, 35*mm])
+    header_table = Table(header_data, colWidths=[25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 20*mm, 30*mm])
     header_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -174,7 +181,7 @@ def generate_pdf(cpr: str, konto_id: str, transactions: list, customer_info: dic
             belob_str = f"-{abs(belob_dkk):,.2f}"
 
         row = [dato, tid, transaction.get('transaktionstype', ''), belob_str, f"{abs(belob):,.2f}" if belob != 0 else '', valuta, transaction.get('butik', '')]
-        row_table = Table([row], colWidths=[25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 15*mm, 35*mm])
+        row_table = Table([row], colWidths=[25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 20*mm, 30*mm])
         row_table.setStyle(TableStyle([
             ('GRID', (0, 0), (-1, 0), 0.5, colors.grey),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
