@@ -83,19 +83,42 @@ def get_jsons() -> list:
 
     return list_of_jsons
 
-def group_transaction_pr_cpr_number(json) -> dict:
+def group_transaction_pr_cpr_number(json: dict) -> dict:
 
     data = json["transaktioner"]
 
-    grouped = {}
+    grouped_transactions = {}
 
     for transaction in data:
         cpr = transaction.pop("cpr")
-        if cpr not in grouped:
-            grouped[cpr] = []
-        grouped[cpr].append(transaction)
+        if cpr not in grouped_transactions:
+            grouped_transactions[cpr] = []
+        grouped_transactions[cpr].append(transaction)
 
-    return grouped
+    return grouped_transactions
+
+
+def build_bank_statement_text(grouped_transactions: dict, bank_data: dict):
+
+    print("")
+    cpr_nii_dict = {}
+
+    for cpr, transactions in grouped_transactions.items():
+        cpr_nii_dict[cpr] = {}
+        for transaction in transactions:
+            konto_id = transaction.pop("konto_id")
+            if konto_id not in cpr_nii_dict[cpr]:
+                cpr_nii_dict[cpr][konto_id] = []
+            cpr_nii_dict[cpr][konto_id].append(transaction)
+
+    print(json.dumps(cpr_nii_dict, indent=2, ensure_ascii=False))
+
+            # print(transaction)
+
+
+
+
+
 
 
 
@@ -110,9 +133,11 @@ def run_app() -> None:
 
     bank_json = lists_of_jsons[0]
     transaction_json = lists_of_jsons[1]
+    
 
-    grouped = group_transaction_pr_cpr_number(transaction_json)
-    print(json.dumps(grouped, indent=2, ensure_ascii=False))
+    grouped_transactions = group_transaction_pr_cpr_number(transaction_json)
+
+    build_bank_statement_text(grouped_transactions, bank_json)
 
 
 run_app()
