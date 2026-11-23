@@ -100,20 +100,15 @@ def group_transaction_pr_cpr_number(json: dict) -> dict:
 
 def build_bank_statement_text(grouped_transactions: dict, bank_data: dict):
 
-    print("")
-    cpr_nii_dict = {}
+    cpr_account_ids_transactions = {}
 
     for cpr, transactions in grouped_transactions.items():
-        cpr_nii_dict[cpr] = {}
+        cpr_account_ids_transactions[cpr] = {}
         for transaction in transactions:
             konto_id = transaction.pop("konto_id")
-            if konto_id not in cpr_nii_dict[cpr]:
-                cpr_nii_dict[cpr][konto_id] = []
-            cpr_nii_dict[cpr][konto_id].append(transaction)
+            cpr_account_ids_transactions[cpr][konto_id] = transaction
 
-    print(json.dumps(cpr_nii_dict, indent=2, ensure_ascii=False))
-
-            # print(transaction)
+    print(json.dumps(cpr_account_ids_transactions, indent=2, ensure_ascii=False))
 
 
 
