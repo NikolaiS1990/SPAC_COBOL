@@ -6,7 +6,7 @@ GenInputData.py
 opgave10/main
 
 # pdfs
-/bank_statements
+opgave10/bank_statements
 
 # environment files
 pyvenv.cfg

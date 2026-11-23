@@ -40,7 +40,7 @@ def check_if_cobol_files() -> None:
         "TextFileToJson.cob",
         "FilesToJson.cob",
         "Banker.txt",
-        "Trans_sml_samp.txt",
+        "Transaktioner.txt",
         "json-buffer.cpy",
         "linje-tabel.cpy",
         "fil-spec.cpy",
@@ -152,19 +152,26 @@ def generate_pdf(cpr: str, konto_id: str, transactions: list, customer_info: dic
     total_indbetalt = 0
     total_udbetalt = 0
 
+    # Currency conversion rates
+    conversion_rates = {'USD': 6.8, 'EUR': 7.5, 'DKK': 1}
+
     for transaction in transactions:
-        belob = transaction.get('belob', 0)
+        belob = transaction.get('beløb', 0)
         valuta = transaction.get('valuta', '')
         tidspunkt = transaction.get('tidspunkt', '')
         dato = tidspunkt[:10] if tidspunkt else ''
         tid = tidspunkt[11:19] if len(tidspunkt) > 19 else ''
 
-        if belob > 0:
-            total_indbetalt += belob
-            belob_str = f"{belob:,.2f}"
+        # Convert to DKK
+        rate = conversion_rates.get(valuta, 1)
+        belob_dkk = belob * rate
+
+        if belob_dkk > 0:
+            total_indbetalt += belob_dkk
+            belob_str = f"{belob_dkk:,.2f}"
         else:
-            total_udbetalt += abs(belob)
-            belob_str = f"-{abs(belob):,.2f}"
+            total_udbetalt += abs(belob_dkk)
+            belob_str = f"-{abs(belob_dkk):,.2f}"
 
         row = [dato, tid, transaction.get('transaktionstype', ''), belob_str, f"{abs(belob):,.2f}" if belob != 0 else '', valuta, transaction.get('butik', '')]
         row_table = Table([row], colWidths=[25*mm, 30*mm, 30*mm, 25*mm, 25*mm, 15*mm, 35*mm])
