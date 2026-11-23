@@ -1,10 +1,12 @@
 111061-4130    Mette Mortensen               Østerbrogade 827C, 6700 Aalborg                   11-10-1961 785-29-22506  0085        -92543.98EUR Indbetaling         Tøjbutik            2025-06-23-11.22.04.000000
 030491-7279    Mette Mortensen               Strandvejen 350A, 2100 Esbjerg                    03-04-1991 792-18-52239  0068        -32132.09EUR Overførsel          Biograf             2024-01-03-17.45.56.000000
-230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016         66416.00USD Overførsel          Apotek              2025-09-09-13.19.51.000000
+230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27361  0016         66416.00DKK Overførsel          Apotek              2025-10-09-13.19.51.000000
 230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016        -94133.55EUR Udbetaling          Boghandel           2021-02-20-11.13.56.000000
 230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016         66503.67EUR Udbetaling          Elektronikbutik     2024-07-30-05.58.21.000000
 230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016         90530.58EUR Indbetaling         Tøjbutik            2024-02-28-00.26.04.000000
 230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016         71140.51DKK Indbetaling         Tankstation         2020-11-30-17.30.28.000000
+230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016        -90717.16EUR Overførsel          Apotek              2022-05-08-17.07.16.000000
+230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016        -90717.16EUR Overførsel          Apotek              2022-05-08-17.07.16.000000
 230791-8570    Niels Andersen                Hovedgaden 138B, 6700 Vejle                       23-07-1991 887-56-27362  0016        -90717.16EUR Overførsel          Apotek              2022-05-08-17.07.16.000000
 040390-7817    Hanne Nielsen                 Frederiks Allé 231C, 7100 Esbjerg                 04-03-1990 465-87-35030  0050        -80081.11USD Indbetaling         Apotek              2022-11-03-22.49.15.000000
 040390-7817    Hanne Nielsen                 Frederiks Allé 231C, 7100 Esbjerg                 04-03-1990 465-87-35030  0050          1677.43EUR Udbetaling          Tøjbutik            2023-01-16-07.20.00.000000

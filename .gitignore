@@ -3,3 +3,14 @@
 
 # Scripts
 GenInputData.py
+opgave10/main
+
+# pdfs
+opgave10/bank_statements
+
+# environment files
+pyvenv.cfg
+opgave10/lib64
+opgave10/bin
+opgave10/lib
+opgave10/include

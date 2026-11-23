@@ -1,10 +1,34 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
-      *> Tells FILES-TO-JSON which text files to turn into JSONs and
-      *> what the fields of each file are, then prints the JSONs.
+      *> Builds ONE JSON, chosen by a command-line argument, and
+      *> prints it to stdout:
+      *>
+      *>     ./main BANK           -> the banks from Banker.txt,
+      *>                              keyed by reg_nr
+      *>     ./main TRANSAKTIONER  -> the transactions from
+      *>                              Trans_sml_samp.txt, as a list
+      *>
+      *> Only these two words are accepted, in uppercase, and exactly
+      *> one argument must be given. Anything else prints a usage
+      *> message to stderr and exits with code 1.
+      *>
+      *> Only the requested JSON is built. MAIN tells FILES-TO-JSON
+      *> which text file to read and where each field is (see
+      *> BUILD-BANK-JSON and BUILD-TRANSAKTIONER-JSON).
+      *>
+      *> Exit codes:
+      *>     0 = the JSON was printed to stdout
+      *>     1 = wrong argument, or no JSON was returned
+      *>
+      *> Meant to be called by other programs, e.g. from Python:
+      *>     subprocess.run(["./main", "BANK"], capture_output=True)
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
+      *> Arguments
+       01 WS-ARG-COUNT PIC 9(2).
+       01 WS-ARG PIC X(20) VALUE SPACES.
+
        01 JSON-SPEC.
            COPY "json-spec.cpy".
 
@@ -36,6 +60,33 @@
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
+           ACCEPT WS-ARG-COUNT FROM ARGUMENT-NUMBER.
+
+           ACCEPT WS-ARG FROM ARGUMENT-VALUE.
+
+           IF WS-ARG-COUNT > 1
+                  DISPLAY "Usage: main BANK | TRANSAKTIONER"
+                       UPON SYSERR
+                  MOVE 1 TO RETURN-CODE
+                  STOP RUN.
+
+           EVALUATE WS-ARG
+               WHEN "BANK"
+                   PERFORM BUILD-BANK-JSON
+                   PERFORM GIVE-BANK-JSON
+               WHEN "TRANSAKTIONER"
+                   PERFORM BUILD-TRANSAKTIONER-JSON
+                   PERFORM GIVE-TRANSAKTIONER-JSON
+               WHEN OTHER
+                  DISPLAY "Usage: main BANK | TRANSAKTIONER"
+                       UPON SYSERR
+                  MOVE 1 TO RETURN-CODE
+           END-EVALUATE.
+
+           STOP RUN.
+
+
+       BUILD-BANK-JSON.
            MOVE 0 TO SPEC-FILE-COUNT
 
       *> Banker.txt: one object per bank, keyed by reg_nr (field 1)
@@ -67,11 +118,11 @@
 
            CALL "FILES-TO-JSON" USING JSON-SPEC WS-BANK-JSON
                WS-BANK-JSON_LEN
-           END-CALL
+           END-CALL.
 
-           MOVE 0 TO SPEC-FILE-COUNT
+       BUILD-TRANSAKTIONER-JSON.
            
-
+           MOVE 0 TO SPEC-FILE-COUNT
       *> Transactions: a list of objects (key field 0)
            MOVE "Trans_sml_samp.txt"    TO NEW-FILE-NAME
            MOVE "transaktioner"         TO NEW-JSON-NAME
@@ -102,22 +153,8 @@
 
            CALL "FILES-TO-JSON" USING JSON-SPEC WS-TRANSACTION-JSON
                WS-TRANSACTION-JSON_LEN
-           END-CALL
-
-           IF WS-BANK-JSON_LEN > 0
-               DISPLAY WS-BANK-JSON(1:WS-BANK-JSON_LEN)
-           ELSE
-               DISPLAY "No BANK-JSON was returned"
-           END-IF
-
-           IF WS-TRANSACTION-JSON_LEN > 0
-               DISPLAY WS-TRANSACTION-JSON(1:WS-TRANSACTION-JSON_LEN)
-           ELSE
-               DISPLAY "No TRANSACTION-JSON was returned"
-           END-IF
-
-           STOP RUN.
-
+           END-CALL.
+         
       *> Add a file to JSON-SPEC. Its fields are added afterwards
       *> with ADD-FIELD.
        ADD-FILE.
@@ -156,4 +193,19 @@
            MOVE FUNCTION NUMVAL(NF-WIDTH) TO SF-WIDTH(WS-F WS-N)
            MOVE NF-TYPE                  TO SF-TYPE(WS-F WS-N).
 
-           
+
+       GIVE-BANK-JSON.
+           IF WS-BANK-JSON_LEN > 0
+               DISPLAY WS-BANK-JSON(1:WS-BANK-JSON_LEN)
+           ELSE
+               DISPLAY "No BANK-JSON was returned" UPON SYSERR
+               MOVE 1 TO RETURN-CODE
+           END-IF.
+
+       GIVE-TRANSAKTIONER-JSON.
+           IF WS-TRANSACTION-JSON_LEN > 0
+               DISPLAY WS-TRANSACTION-JSON(1:WS-TRANSACTION-JSON_LEN)
+           ELSE
+               DISPLAY "No TRANSACTION-JSON was returned" UPON SYSERR
+               MOVE 1 TO RETURN-CODE
+           END-IF.
